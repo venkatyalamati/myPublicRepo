@@ -1,0 +1,70 @@
+#include <Arduino.h>
+
+// Function to calculate XOR checksum
+uint8_t calculateXORChecksum(const char* data, size_t length) {
+    uint8_t checksum = 0;
+
+    for (size_t i = 0; i < length; ++i) {
+        checksum ^= data[i];
+    }
+
+    return checksum;
+}
+
+// Function to calculate addition checksum
+uint8_t calculateAddChecksum(const char* data, size_t length) {
+    uint8_t sum = 0;
+
+    for (size_t i = 0; i < length; ++i) {
+        sum += data[i];
+    }
+
+    return sum;
+}
+
+// Function to calculate modular checksum
+uint8_t calculateModularChecksum(const char* data, size_t length) {
+    uint8_t checksum = 0;
+
+    for (size_t i = 0; i < length; ++i) {
+        checksum = (checksum + data[i]) % 256;
+    }
+
+    return checksum;
+}
+
+// Function to combine XOR, addition, and modular checksums
+uint16_t combineChecksums(uint8_t xorChecksum, uint8_t addChecksum, uint8_t modularChecksum) {
+    return (static_cast<uint16_t>(xorChecksum) << 16) | (static_cast<uint16_t>(addChecksum) << 8) | modularChecksum;
+}
+
+void setup() {
+    Serial.begin(9600);
+
+    // Example data
+    const char data[] = "Hello, World!";
+
+    // Calculate XOR, addition, and modular checksums
+    uint8_t xorChecksum = calculateXORChecksum(data, sizeof(data) - 1); // Exclude null terminator
+    uint8_t addChecksum = calculateAddChecksum(data, sizeof(data) - 1);
+    uint8_t modularChecksum = calculateModularChecksum(data, sizeof(data) - 1);
+
+    // Combine the checksums
+    uint16_t combinedChecksum = combineChecksums(xorChecksum, addChecksum, modularChecksum);
+
+    // Print the results
+    Serial.print("Data: ");
+    Serial.println(data);
+    Serial.print("XOR Checksum: 0x");
+    Serial.println(xorChecksum, HEX);
+    Serial.print("Addition Checksum: 0x");
+    Serial.println(addChecksum, HEX);
+    Serial.print("Modular Checksum: 0x");
+    Serial.println(modularChecksum, HEX);
+    Serial.print("Combined Checksum: 0x");
+    Serial.println(combinedChecksum, HEX);
+}
+
+void loop() {
+    // Nothing here for a simple example
+}
