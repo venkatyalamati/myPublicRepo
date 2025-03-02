@@ -1,0 +1,46 @@
+#include <ModbusMaster.h>
+
+// Instantiate ModbusMaster object
+ModbusMaster node;
+
+#define RS485_DE_RE 2 // Define the pin for DE/RE of RS-485 module
+
+void preTransmission() {
+  digitalWrite(RS485_DE_RE, HIGH); // Enable transmission mode
+}
+
+void postTransmission() {
+  digitalWrite(RS485_DE_RE, LOW); // Enable receiving mode
+}
+
+void setup() {
+  pinMode(RS485_DE_RE, OUTPUT);
+  digitalWrite(RS485_DE_RE, LOW); // Start in receive mode
+  
+  // Initialize Serial port for Modbus communication
+  Serial.begin(9600);
+  
+  // Setup Modbus communication parameters
+  node.begin(1, Serial); // Address of the transducer
+  node.preTransmission(preTransmission);
+  node.postTransmission(postTransmission);
+}
+
+void loop() {
+  uint8_t result;
+  uint16_t data;
+
+  // Example: Read holding register 0x0000 (you need to know the register address)
+  result = node.readHoldingRegisters(0x0000, 1);
+
+  // If data is received successfully
+  if (result == node.ku8MBSuccess) {
+    data = node.getResponseBuffer(0); // Get the received data
+    Serial.print("Data: ");
+    Serial.println(data);
+  } else {
+    Serial.println("Failed to read data");
+  }
+  
+  delay(1000); // Delay for reading next set of data
+}
