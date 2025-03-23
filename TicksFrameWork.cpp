@@ -1,4 +1,6 @@
 using namespace std;
+#define Timer1Period 100 //in milli sec
+boolean startBeeping = false;
 class Tiks
 {
   private:
@@ -21,20 +23,49 @@ class Tiks
       return _maxReached;
     }
 };
-
+class Buzzer{
+  private:
+    int onTimeCntMax, onTimeCnt;
+    boolean isOn;
+  public:
+    Buzzer(){
+      isOn = false; startBeeping = false;
+    }
+    void turnOn(int onTime_ms){
+      onTimeCntMax = onTime_ms/Timer1Period;
+      isOn = true;
+      onTimeCnt = 0;
+      digitalWrite(buzzerPin, HIGH);
+    }
+    void check_turnOff(){
+      if(isOn){
+        onTimeCnt++;
+        if(onTimeCnt>=onTimeCntMax){
+          digitalWrite(buzzerPin, LOW);
+          isOn = false;
+        }
+      }
+    }
+};
 //global variables
-#define Timer1Period 100 //in milli sec
+
 Tiks tik_500ms(500);
 Tiks tik_1000ms(1000);
+Buzzer buzzer;
 
 void setup(){
   // setup & start the timer here
+  startBeeping = true;
 }
 ISR{ // runs once in every Timer1Period
+  buzzer.check_turnOff();
+  
   if(tik_500ms.incTik()){
     
   }
   if(tik_1000ms.incTik()){
+    if(startBeeping)
+      buzzer.turnOn(400);
     
   }
   
