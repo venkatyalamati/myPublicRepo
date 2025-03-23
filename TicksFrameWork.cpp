@@ -26,8 +26,11 @@ class Tiks
 #define Timer1Period 100 //in milli sec
 Tiks tik_500ms(500);
 Tiks tik_1000ms(1000);
-// start the timer now
-ISR{
+
+void setup(){
+  // setup & start the timer here
+}
+ISR{ // runs once in every Timer1Period
   if(tik_500ms.incTik()){
     
   }
