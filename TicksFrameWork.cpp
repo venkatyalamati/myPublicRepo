@@ -3,16 +3,37 @@ class Tiks
 {
   private:
     int _cnt, _cntMax;
+    boolean _maxReached;
   public:
-    Tiks(int cntMax){
-      _cntMax = cntMax;
+    Tiks(int cntMax_ms){
+      _cntMax = cntMax_ms/Timer1Period;
       _cnt = 0;
     }
-    void incTik(){
+    boolean incTik(){
       _cnt++;
-      if(_cnt > _cntMax){
+      if(_cnt >= _cntMax){
         _cnt = 0;
-        taskTik();
+        _maxReached = true;;
       }
+      else{
+        _maxReached = false;
+      }
+      return _maxReached;
     }
 };
+
+//global variables
+#define Timer1Period 100 //in milli sec
+Tiks tik_500ms(500);
+Tiks tik_1000ms(1000);
+// start the timer now
+ISR{
+  if(tik_500ms.incTik()){
+    
+  }
+  if(tik_1000ms.incTik()){
+    
+  }
+  
+}
+
