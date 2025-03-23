@@ -4,45 +4,58 @@ boolean startBeeping = false;
 class Tiks
 {
   private:
-    int _cnt, _cntMax;
-    boolean _maxReached;
+    int cnt, cntMax;
+    boolean maxReached;
   public:
     Tiks(int cntMax_ms){
-      _cntMax = cntMax_ms/Timer1Period;
-      _cnt = 0;
+      cntMax = cntMax_ms/Timer1Period;
+      cnt = 0;
     }
     boolean incTik(){
-      _cnt++;
-      if(_cnt >= _cntMax){
-        _cnt = 0;
-        _maxReached = true;
+      cnt++;
+      if(cnt >= cntMax){
+        cnt = 0;
+        maxReached = true;
       }
       else{
-        _maxReached = false;
+        maxReached = false;
       }
-      return _maxReached;
+      return maxReached;
     }
 };
 class Buzzer{
   private:
-    int onTimeCntMax, onTimeCnt;
-    boolean isOn;
+    int onTimeCntMax, onTimeCnt, numBeeps, maxBeeps;
+    boolean isOn, beepingOn;
   public:
     Buzzer(){
-      isOn = false; startBeeping = false;
+      isOn = false;
+      onTimeCntMax = 600/Timer1Period;
     }
-    void turnOn(int onTime_ms){
-      onTimeCntMax = onTime_ms/Timer1Period;
+    void checkIfBeepingReq(){
+      if(beepingOn)
+        turnOn();
+    }
+    void srtBeeping(int _maxBeeps){
+      maxBeeps = _maxBeeps;
+      numBeeps = 0;
+      beepingOn = true;
+    }
+    void turnOn(){
       isOn = true;
       onTimeCnt = 0;
       digitalWrite(buzzerPin, HIGH);
     }
-    void check_turnOff(){
-      if(isOn){
+    void checkIfTurnOffReq(){
+      if(isOn){ // check for beep duration
         onTimeCnt++;
-        if(onTimeCnt>=onTimeCntMax){
+        if(onTimeCnt>=onTimeCntMax){ // turn off the buzzer & check for numBeeps count
           digitalWrite(buzzerPin, LOW);
           isOn = false;
+          numBeeps++;
+          if(numBeeps>=maxBeeps){
+            beepingOn = false;
+          }
         }
       }
     }
@@ -83,18 +96,16 @@ Buzzer buzzer;
 
 void setup(){
   // setup & start the timer here
-  startBeeping = true;
+  buzzer.srtBeeping(90); // max beeps
 }
 ISR{ // runs once in every Timer1Period
-  buzzer.check_turnOff();
+  buzzer.checkIfTurnOffReq();
   
   if(tik_500ms.incTik()){
     
   }
   if(tik_1000ms.incTik()){
-    if(startBeeping)
-      buzzer.turnOn(400);
-    
+    buzzer.checkIfBeepingReq();
   }
   
 }
