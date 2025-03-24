@@ -1,6 +1,5 @@
 using namespace std;
 #define Timer1Period 100 //in milli sec
-boolean startBeeping = false;
 class Tiks
 {
   private:
