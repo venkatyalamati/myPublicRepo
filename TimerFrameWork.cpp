@@ -4,22 +4,21 @@ class Tiks
 {
   private:
     int cnt, cntMax;
-    boolean maxReached;
+  
   public:
     Tiks(int cntMax_ms){
       cntMax = cntMax_ms/Timer1Period;
       cnt = 0;
     }
-    boolean incTik(){
+    boolean doTheTikTask(){
       cnt++;
       if(cnt >= cntMax){
         cnt = 0;
-        maxReached = true;
+        return true;
       }
       else{
-        maxReached = false;
+        return false;
       }
-      return maxReached;
     }
 };
 class Buzzer{
