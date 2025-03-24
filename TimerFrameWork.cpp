@@ -30,7 +30,7 @@ class Buzzer{
       isOn = false;
       onTimeCntMax = 600/Timer1Period;
     }
-    void checkIfBeepingReq(){
+    void turnOnBuzzerIfReq(){
       if(beepingOn)
         turnOn();
     }
@@ -102,7 +102,7 @@ ISR{ // runs after every Timer1Period
     
   }
   if(tik_1000ms.doTheTikTask()){
-    buzzer.checkIfBeepingReq();
+    buzzer.turnOnBuzzerIfReq();
   }
   
 }
