@@ -1,62 +1,5 @@
 using namespace std;
 #define Timer1Period 100 //in milli sec
-class Tiks
-{
-  private:
-    int cnt, cntMax;
-  
-  public:
-    Tiks(int cntMax_ms){
-      cntMax = cntMax_ms/Timer1Period;
-      cnt = 0;
-    }
-    boolean doTheTikTask(){
-      cnt++;
-      if(cnt >= cntMax){
-        cnt = 0;
-        return true;
-      }
-      else{
-        return false;
-      }
-    }
-};
-class Buzzer{
-  private:
-    int onTimeCntMax, onTimeCnt, numBeeps, maxBeeps;
-    boolean isOn;
-  public:
-    boolean beepingOn;
-    Buzzer(int onTimeMilliSec){
-      isOn = false; beepingOn = false;
-      onTimeCntMax = onTimeMilliSec/Timer1Period;
-    }
-    void turnOn(){
-      isOn = true;
-      onTimeCnt = 0;
-      digitalWrite(buzzerPin, HIGH);
-    }
-    void srtBeeping(int _maxBeeps){
-      maxBeeps = _maxBeeps;
-      numBeeps = 0;
-      beepingOn = true;
-    }
-    void turnOffBuzzer(){
-      if(isOn){ // check for beep duration
-        onTimeCnt++;
-        if(onTimeCnt>=onTimeCntMax){ // turn off the buzzer & check for numBeeps count
-          digitalWrite(buzzerPin, LOW);
-          isOn = false;
-          if(beepingOn){
-            numBeeps++;
-            if(numBeeps>=maxBeeps)
-              beepingOn = false;
-          }         
-        }
-      }
-    }
-};
-
 void setupTimer1(){
   int OCR1A_Value;
   // = (16*10^6) / (1*1024) (must be <65536) ->'15625' is for ISR interval of 1000ms @16MHz, hence 780-> 100ms for 8Mhz
@@ -83,24 +26,86 @@ void enableTimer1_Int(){
 void disableTimer1_Int(){
     TIMSK1 &= ~(1 << OCIE1A); // disable timer1 interrupt
 }
+class Tiks
+{
+  private:
+    int cnt, cntMax;
+  
+  public:
+    Tiks(int cntMax_ms){
+      cntMax = cntMax_ms/Timer1Period;
+      cnt = 0;
+    }
+    boolean execTask(){
+      cnt++;
+      if(cnt >= cntMax){
+        cnt = 0;
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+};
+class Buzzer{
+  private:
+    int onTimeCntMax, onTimeCnt, numBeeps, maxBeeps;
+    boolean isOn;
+  public:
+    boolean beepingOn;
+    Buzzer(){
+      isOn = false; beepingOn = false;
+      onTimeCntMax = 1;
+    }
+    void setOnTimeMilliSec(int onTimeMilliSec){
+      onTimeCntMax = onTimeMilliSec/Timer1Period;
+    }
+    void turnOn(){
+      isOn = true;
+      onTimeCnt = 0;
+      digitalWrite(buzzerPin, HIGH);
+    }
+    void srtBeeping(int _maxBeeps){
+      maxBeeps = _maxBeeps;
+      numBeeps = 0;
+      beepingOn = true;
+    }
+    void turnOff_ifReq(){
+      if(isOn){ // check for beep duration
+        onTimeCnt++;
+        if(onTimeCnt>=onTimeCntMax){ // turn off the buzzer & check for numBeeps count
+          digitalWrite(buzzerPin, LOW);
+          isOn = false;
+          if(beepingOn){
+            numBeeps++;
+            if(numBeeps>=maxBeeps)
+              beepingOn = false;
+          }         
+        }
+      }
+    }
+};
+
 //global variables
 
 Tiks tik_500ms(500);
 Tiks tik_1000ms(1000);
-Buzzer buzzer(400);
+Buzzer buzzer;
 
 void setup(){
   // setup & start the timer here
+  buzzer.setOnTimeMilliSec(400);
   buzzer.srtBeeping(90); // max beeps
   // buzzer.turnOn();
 }
+
 ISR{ // runs after every Timer1Period
-  buzzer.turnOffBuzzer();
+  buzzer.turnOff_ifReq();
   
-  if(tik_500ms.doTheTikTask()){
+  if(tik_500ms.execTask()){
     
   }
-  if(tik_1000ms.doTheTikTask()){
+  if(tik_1000ms.execTask()){
     if(buzzer.beepingOn)
       buzzer.turnOn();
   }
