@@ -62,9 +62,8 @@ class Buzzer{
 
 void setupTimer1(){
   int OCR1A_Value;
-  // = (16*10^6) / (1*1024) - 1 (must be <65536) ->'15625' is for ISR interval of 1000ms @16MHz, hence 780-> 100ms for 8Mhz
+  // = (16*10^6) / (1*1024) (must be <65536) ->'15625' is for ISR interval of 1000ms @16MHz, hence 780-> 100ms for 8Mhz
   OCR1A_Value = (16 * 1000 * Timer1Period) / 1024; // for 16.0 MHz
-  OCR1A_Value--;
   //set timer1 interrupt
   TCCR1A = 0;// set entire TCCR1A register to 0
   TCCR1B = 0;// same for TCCR1B
