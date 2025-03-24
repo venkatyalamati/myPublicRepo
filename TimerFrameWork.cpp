@@ -98,10 +98,10 @@ void setup(){
 ISR{ // runs after every Timer1Period
   buzzer.checkIfTurnOffReq();
   
-  if(tik_500ms.incTik()){
+  if(tik_500ms.doTheTikTask()){
     
   }
-  if(tik_1000ms.incTik()){
+  if(tik_1000ms.doTheTikTask()){
     buzzer.checkIfBeepingReq();
   }
   
