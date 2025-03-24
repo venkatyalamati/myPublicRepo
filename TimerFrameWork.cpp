@@ -24,36 +24,34 @@ class Tiks
 class Buzzer{
   private:
     int onTimeCntMax, onTimeCnt, numBeeps, maxBeeps;
-    boolean isOn, beepingOn;
+    boolean isOn;
   public:
-    Buzzer(){
-      isOn = false;
-      onTimeCntMax = 600/Timer1Period;
-    }
-    void turnOnBuzzerIfReq(){
-      if(beepingOn)
-        turnOn();
-    }
-    void srtBeeping(int _maxBeeps){
-      maxBeeps = _maxBeeps;
-      numBeeps = 0;
-      beepingOn = true;
+    boolean beepingOn;
+    Buzzer(int onTimeMilliSec){
+      isOn = false; beepingOn = false;
+      onTimeCntMax = onTimeMilliSec/Timer1Period;
     }
     void turnOn(){
       isOn = true;
       onTimeCnt = 0;
       digitalWrite(buzzerPin, HIGH);
     }
-    void checkIfTurnOffReq(){
+    void srtBeeping(int _maxBeeps){
+      maxBeeps = _maxBeeps;
+      numBeeps = 0;
+      beepingOn = true;
+    }
+    void turnOffBuzzer(){
       if(isOn){ // check for beep duration
         onTimeCnt++;
         if(onTimeCnt>=onTimeCntMax){ // turn off the buzzer & check for numBeeps count
           digitalWrite(buzzerPin, LOW);
           isOn = false;
-          numBeeps++;
-          if(numBeeps>=maxBeeps){
-            beepingOn = false;
-          }
+          if(beepingOn){
+            numBeeps++;
+            if(numBeeps>=maxBeeps)
+              beepingOn = false;
+          }         
         }
       }
     }
@@ -89,20 +87,22 @@ void disableTimer1_Int(){
 
 Tiks tik_500ms(500);
 Tiks tik_1000ms(1000);
-Buzzer buzzer;
+Buzzer buzzer(400);
 
 void setup(){
   // setup & start the timer here
   buzzer.srtBeeping(90); // max beeps
+  // buzzer.turnOn();
 }
 ISR{ // runs after every Timer1Period
-  buzzer.checkIfTurnOffReq();
+  buzzer.turnOffBuzzer();
   
   if(tik_500ms.doTheTikTask()){
     
   }
   if(tik_1000ms.doTheTikTask()){
-    buzzer.turnOnBuzzerIfReq();
+    if(buzzer.beepingOn)
+      buzzer.turnOn();
   }
   
 }
