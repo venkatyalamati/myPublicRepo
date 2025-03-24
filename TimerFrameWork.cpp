@@ -97,7 +97,7 @@ void setup(){
   // setup & start the timer here
   buzzer.srtBeeping(90); // max beeps
 }
-ISR{ // runs once in every Timer1Period
+ISR{ // runs after every Timer1Period
   buzzer.checkIfTurnOffReq();
   
   if(tik_500ms.incTik()){
