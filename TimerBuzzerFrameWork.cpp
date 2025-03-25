@@ -1,5 +1,6 @@
 using namespace std;
 #define Timer1PeriodMilSec 100
+#define BuzzerPin 4
 void setupTimer1(){
   int OCR1A_Value;
   // = (16*10^6) / (1*1024) (must be <65536) ->'15625' is for ISR interval of 1000ms @16MHz, hence 780-> 100ms for 8Mhz
@@ -26,6 +27,7 @@ void enableTimer1_Int(){
 void disableTimer1_Int(){
     TIMSK1 &= ~(1 << OCIE1A); // disable timer1 interrupt
 }
+
 class Tiks
 {
   private:
@@ -47,20 +49,22 @@ class Tiks
       }
     }
 };
+
 class Buzzer{
   private:
-    int onTimeCntMax, onTimeCnt, beepNum, numBeeps;
-    boolean isOn;
+    int onTimeCntMax, onTimeCnt, beepNum, numBeeps, timerPeriodMilSec;
+    boolean isOn; byte buzzerPin;
   public:
     boolean beepingOn;
-    Buzzer(int onTimeMilliSec, int _numBeeps, int timerPeriodMilSec){
-      onTimeCntMax = onTimeMilliSec/timerPeriodMilSec;
+    Buzzer(byte _buzzerPin, int onTimeMilliSec, int numBeeps, int _timerPeriodMilSec){
+      timerPeriodMilSec = _timerPeriodMilSec;
+      buzzerPin = _buzzerPin;
+      set_OnTime_Beeps(onTimeMilliSec, numBeeps);
+    }
+    void set_OnTime_Beeps(int _onTimeMilliSec, int _numBeeps){
+      onTimeCntMax = _onTimeMilliSec/timerPeriodMilSec;
       numBeeps = _numBeeps;
       isOn = false; beepingOn = false;
-    }
-    void set_OnTimeMilSec_NumBeeps(int onTimeMilliSec, int _numBeeps){
-      onTimeCntMax = onTimeMilliSec/Timer1Period;
-      numBeeps = _numBeeps;
     }
     void turnOn(){
       isOn = true;
@@ -87,20 +91,7 @@ class Buzzer{
     }
 };
 
-//global variables
-
-Tiks tik_500ms(500, Timer1PeriodMilSec);
-Tiks tik_1000ms(1000, Timer1PeriodMilSec);
-Buzzer buzzer(400, 90, Timer1PeriodMilSec);
-
-void setup(){
-  // setup & start the timer here
-  // buzzer.set_OnTimeMilSec_NumBeeps(400, 90);
-  // buzzer.turnOn();
-  buzzer.srtBeeping(); // max beeps
-}
-
-ISR{ // runs after every Timer1Period
+ISR(TIMER1_COMPA_vect){ // runs after every Timer1Period
   buzzer.turnOff_ifReq();
   
   if(tik_500ms.execTask()){
@@ -113,3 +104,21 @@ ISR{ // runs after every Timer1Period
   
 }
 
+//global variables
+Tiks tik_500ms(500, Timer1PeriodMilSec);
+Tiks tik_1000ms(1000, Timer1PeriodMilSec);
+Buzzer buzzer(BuzzerPin, 400, 90, Timer1PeriodMilSec);
+
+void setup() {
+  // put your setup code here, to run once:
+  setupTimer1();
+  enableTimer1_Int();
+  // buzzer.set_OnTime_Beeps(400, 90);
+  // buzzer.turnOn();
+  buzzer.srtBeeping(); // max beeps
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+}
