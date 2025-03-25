@@ -1,9 +1,9 @@
 using namespace std;
-#define Timer1Period 100 //in milli sec
+#define Timer1PeriodMilSec 100
 void setupTimer1(){
   int OCR1A_Value;
   // = (16*10^6) / (1*1024) (must be <65536) ->'15625' is for ISR interval of 1000ms @16MHz, hence 780-> 100ms for 8Mhz
-  OCR1A_Value = (16 * 1000 * Timer1Period) / 1024; // for 16.0 MHz
+  OCR1A_Value = (16 * 1000 * Timer1PeriodMilSec) / 1024; // for 16.0 MHz
   //set timer1 interrupt
   TCCR1A = 0;// set entire TCCR1A register to 0
   TCCR1B = 0;// same for TCCR1B
@@ -32,8 +32,8 @@ class Tiks
     int cnt, cntMax;
   
   public:
-    Tiks(int cntMax_ms){
-      cntMax = cntMax_ms/Timer1Period;
+    Tiks(int tikPeriodMilSec, int timerPeriodMilSec){
+      cntMax = tikPeriodMilSec/timerPeriodMilSec;
       cnt = 0;
     }
     boolean execTask(){
@@ -53,13 +53,13 @@ class Buzzer{
     boolean isOn;
   public:
     boolean beepingOn;
-    Buzzer(int _onTimeMilliSec, int _numBeeps){
-      onTimeCntMax = _onTimeMilliSec/Timer1Period;
+    Buzzer(int onTimeMilliSec, int _numBeeps, int timerPeriodMilSec){
+      onTimeCntMax = onTimeMilliSec/timerPeriodMilSec;
       numBeeps = _numBeeps;
       isOn = false; beepingOn = false;
     }
-    void set_OnTimeMilliSec_numBeeps(int _onTimeMilliSec, int _numBeeps){
-      onTimeCntMax = _onTimeMilliSec/Timer1Period;
+    void set_OnTimeMilSec_NumBeeps(int onTimeMilliSec, int _numBeeps){
+      onTimeCntMax = onTimeMilliSec/Timer1Period;
       numBeeps = _numBeeps;
     }
     void turnOn(){
@@ -89,15 +89,15 @@ class Buzzer{
 
 //global variables
 
-Tiks tik_500ms(500);
-Tiks tik_1000ms(1000);
-Buzzer buzzer(400, 90);
+Tiks tik_500ms(500, Timer1PeriodMilSec);
+Tiks tik_1000ms(1000, Timer1PeriodMilSec);
+Buzzer buzzer(400, 90, Timer1PeriodMilSec);
 
 void setup(){
   // setup & start the timer here
-  // buzzer.set_OnTimeMilliSec_numBeeps(400, 90);
-  buzzer.srtBeeping(); // max beeps
+  // buzzer.set_OnTimeMilSec_NumBeeps(400, 90);
   // buzzer.turnOn();
+  buzzer.srtBeeping(); // max beeps
 }
 
 ISR{ // runs after every Timer1Period
